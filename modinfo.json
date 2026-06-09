@@ -1,0 +1,12 @@
+{
+    "type": "code",
+    "modid": "labeledtrunk",
+    "name": "Labeled Trunks",
+    "authors": [ "pizza2004" ],
+    "contributors": [ "raschuetzer" ],
+    "description": "Adds labeled trunks to the game. 1.22 port with label rendering fix.",
+    "version": "1.1.0",
+    "dependencies": {
+        "game": "1.22.0"
+    }
+}

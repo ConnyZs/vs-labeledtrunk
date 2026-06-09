@@ -1,0 +1,43 @@
+[
+  {
+    "file": "lc:blocktypes/stationarybasket",
+    "op": "replace",
+    "path": "/entityclass",
+    "value": "LabeledGenericTypedContainer",
+    "dependsOn": [ { "modid": "lc" } ]
+  },
+  {
+    "file": "lc:blocktypes/stationarybasket",
+    "op": "replace",
+    "path": "/creativeinventoryStacksByType",
+    "value": {
+      "*-east": [
+        {
+          "tabs": [ "general", "decorative" ],
+          "stacks": [
+            { "type": "block", "code": "lblstationarybasket-east", "attributes": { "type": "reed" }
+            }
+          ]
+        }
+      ]
+    },
+    "dependsOn": [ { "modid": "lc" } ]
+  },
+  {
+    "file": "lc:blocktypes/storagevessel",
+    "op": "replace",
+    "path": "/entityclass",
+    "value": "LabeledGenericTypedContainer",
+    "dependsOn": [ { "modid": "lc" } ]
+  },
+  {
+    "file": "lc:blocktypes/ancienttools/barkbasket",
+    "op": "replace",
+    "path": "/entityclass",
+    "value": "LabeledGenericTypedContainer",
+    "dependsOn": [
+      { "modid": "lc" },
+      { "modid": "ancienttools" }
+    ]
+  }
+]

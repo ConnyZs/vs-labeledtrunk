@@ -1,0 +1,17 @@
+{
+  "ingredientPattern": "S,C",
+  "ingredients": {
+    "S": { "type": "item", "code": "game:saw-*", "isTool": true },
+    "C": {
+      "type": "block",
+      "code": "labeledtrunk-east",
+      "attributes": { "type": "normal-labeled" },
+      "returnedStack": { "type": "block", "code": "game:sign-ground-north" }
+    }
+  },
+  "recipeGroup": 2,
+  "shapeless": true,
+  "width": 1,
+  "height": 2,
+  "output": { "type": "block", "code": "game:trunk-east", "attributes": { "type": "normal-generic" } }
+}
