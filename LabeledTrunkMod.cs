@@ -68,33 +68,43 @@ public class ChestLabelRendererPatch
             slabOffset = -0.5f;
 
         var rpi = capi.Render;
-        rpi.GlDisableCullFace();
         rpi.GlToggleBlend(true, EnumBlendMode.PremultipliedAlpha);
 
-        var prog = rpi.PreparedStandardShader(pos.X, pos.Y, pos.Z);
-        prog.RgbaLightIn      = capi.World.BlockAccessor.GetLightRGBs(pos);
-        prog.Tex2D            = loadedTexture.TextureId;
-        prog.NormalShaded     = 0;
-        prog.ExtraGodray      = 0f;
-        prog.SsaoAttn         = 0f;
-        prog.AlphaTest        = 0.05f;
-        prog.OverlayOpacity   = 0f;
-        prog.AddRenderFlags   = 0;
-        prog.ModelMatrix = modelMat
+        // Vanilla uses a static progCached on BlockEntitySignRenderer so PreparedStandardShader
+        // is only called once per frame across all chest label renderers. Calling it multiple
+        // times per frame with Stop() in between corrupts VS's internal shader-active flag:
+        // the flag says "prepared" but the GL program is unbound, so the next call skips
+        // Use() and uniform writes crash with "not active shader standard".
+        var progCachedField = AccessTools.Field(typeof(BlockEntitySignRenderer), "progCached");
+        var prog = progCachedField?.GetValue(null) as IStandardShaderProgram;
+        if (prog == null)
+        {
+            rpi.GlDisableCullFace();
+            prog = rpi.PreparedStandardShader(pos.X, pos.InternalY, pos.Z);
+            prog.ViewMatrix       = rpi.CameraMatrixOriginf;
+            prog.ProjectionMatrix = rpi.CurrentProjectionMatrix;
+            prog.NormalShaded     = 0;
+            prog.ExtraGodray      = 0f;
+            prog.SsaoAttn         = 0f;
+            prog.AlphaTest        = 0.05f;
+            prog.OverlayOpacity   = 0f;
+            progCachedField?.SetValue(null, prog);
+        }
+
+        prog.RgbaLightIn    = capi.World.BlockAccessor.GetLightRGBs(pos);
+        prog.AddRenderFlags = 0;
+        prog.Tex2D          = loadedTexture.TextureId;
+        prog.ModelMatrix    = modelMat
             .Identity()
             .Translate(pos.X - camPos.X, pos.Y - camPos.Y, pos.Z - camPos.Z)
             .Translate(0.5f, 0.5f, 0.5f)
             .RotateY(rotY + GameMath.PI)
             .Translate(-0.5, -0.5, -0.5)
-            // trunk sign panel: x shifted -0.5 relative to a regular chest
             .Translate(0.0f, 0.35f + slabOffset, 0.0925f)
             .Scale(0.45f * quadW, 0.45f * quadH, 0.45f * quadW)
             .Values;
-        prog.ViewMatrix       = rpi.CameraMatrixOriginf;
-        prog.ProjectionMatrix = rpi.CurrentProjectionMatrix;
 
         rpi.RenderMesh(quadRef);
-        ((IShaderProgram)prog).Stop();
         rpi.GlToggleBlend(true, EnumBlendMode.Standard);
 
         return false;
