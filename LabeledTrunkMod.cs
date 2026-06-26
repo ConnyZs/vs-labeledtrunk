@@ -60,17 +60,11 @@ public class ChestLabelRendererPatch
         var camPos = capi.World.Player.Entity.CameraPos;
         if (camPos.SquareDistanceTo(pos.X, pos.Y, pos.Z) > 400f) return false;
 
-        float slabOffset = 0f;
-        var blockBelow = capi.World.BlockAccessor.GetBlock(pos.AddCopy(0, -1, 0));
-        if (blockBelow?.Shape?.Base?.Path?.Contains("slab-down") == true)
-            slabOffset = -0.5f;
-
         var rpi = capi.Render;
         rpi.GlDisableCullFace();
         rpi.GlToggleBlend(true, EnumBlendMode.PremultipliedAlpha);
 
         var prog = rpi.PreparedStandardShader(pos.X, pos.Y, pos.Z);
-        prog.RgbaLightIn      = capi.World.BlockAccessor.GetLightRGBs(pos);
         prog.Tex2D            = loadedTexture.TextureId;
         prog.NormalShaded     = 0;
         prog.ExtraGodray      = 0f;
@@ -85,7 +79,7 @@ public class ChestLabelRendererPatch
             .RotateY(rotY + GameMath.PI)
             .Translate(-0.5, -0.5, -0.5)
             // trunk sign panel: x shifted -0.5 relative to a regular chest
-            .Translate(0.0f, 0.35f + slabOffset, 0.0925f)
+            .Translate(0.0f, 0.35f, 0.0925f)
             .Scale(0.45f * quadW, 0.45f * quadH, 0.45f * quadW)
             .Values;
         prog.ViewMatrix       = rpi.CameraMatrixOriginf;
