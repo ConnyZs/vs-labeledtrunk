@@ -41,6 +41,7 @@ public class ChestLabelRendererPatch
         var pos  = t.Field("pos").GetValue() as BlockPos;
 
         if (capi == null || pos == null) return true;
+        if (stage != EnumRenderStage.Opaque) return true;
 
         var block = capi.World.BlockAccessor.GetBlock(pos);
         if (block == null || !block.Code.Path.Contains("labeledtrunk")) return true;
