@@ -71,6 +71,7 @@ public class ChestLabelRendererPatch
         rpi.GlToggleBlend(true, EnumBlendMode.PremultipliedAlpha);
 
         var prog = rpi.PreparedStandardShader(pos.X, pos.Y, pos.Z);
+        prog.RgbaLightIn      = capi.World.BlockAccessor.GetLightRGBs(pos);
         prog.Tex2D            = loadedTexture.TextureId;
         prog.NormalShaded     = 0;
         prog.ExtraGodray      = 0f;
