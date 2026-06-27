@@ -31,9 +31,11 @@ public class LabeledTrunkMod : ModSystem
 [HarmonyPatch(typeof(ChestLabelRenderer), nameof(ChestLabelRenderer.OnRenderFrame))]
 public class ChestLabelRendererPatch
 {
-    // Only intercept when the block at this position is a labeled trunk.
-    // For everything else (vanilla labeled chests, etc.) let the original method run.
-    // When loadedTexture is null we also fall through so vanilla's lazy RenderText() path runs first.
+    // Resolved once at class-init. Vanilla's static cache field so PreparedStandardShader
+    // is only called once per frame across all chest label renderers — not per-trunk.
+    static readonly System.Reflection.FieldInfo? ProgCachedField =
+        AccessTools.Field(typeof(BlockEntitySignRenderer), "progCached");
+
     static bool Prefix(ChestLabelRenderer __instance, float deltaTime, EnumRenderStage stage)
     {
         var t    = Traverse.Create(__instance);
@@ -70,13 +72,7 @@ public class ChestLabelRendererPatch
         var rpi = capi.Render;
         rpi.GlToggleBlend(true, EnumBlendMode.PremultipliedAlpha);
 
-        // Vanilla uses a static progCached on BlockEntitySignRenderer so PreparedStandardShader
-        // is only called once per frame across all chest label renderers. Calling it multiple
-        // times per frame with Stop() in between corrupts VS's internal shader-active flag:
-        // the flag says "prepared" but the GL program is unbound, so the next call skips
-        // Use() and uniform writes crash with "not active shader standard".
-        var progCachedField = AccessTools.Field(typeof(BlockEntitySignRenderer), "progCached");
-        var prog = progCachedField?.GetValue(null) as IStandardShaderProgram;
+        var prog = ProgCachedField?.GetValue(null) as IStandardShaderProgram;
         if (prog == null)
         {
             rpi.GlDisableCullFace();
@@ -88,7 +84,7 @@ public class ChestLabelRendererPatch
             prog.SsaoAttn         = 0f;
             prog.AlphaTest        = 0.05f;
             prog.OverlayOpacity   = 0f;
-            progCachedField?.SetValue(null, prog);
+            ProgCachedField?.SetValue(null, prog);
         }
 
         prog.RgbaLightIn    = capi.World.BlockAccessor.GetLightRGBs(pos);
